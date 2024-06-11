@@ -1,6 +1,7 @@
 package com.andygomez.register_login.flow.infrastructure;
 
 import com.andygomez.register_login.flow.application.TokenUseCase;
+import com.andygomez.register_login.flow.model.MailModel;
 import com.andygomez.register_login.flow.model.UserModel;
 import com.andygomez.register_login.flow.model.repository.UserRepository;
 import com.andygomez.register_login.flow.web.model.UserInput;
@@ -23,6 +24,7 @@ public class UserAdapter {
 
     public UserModel inputToModel(UserInput input, String uuidPassword){
         return UserModel.builder()
+                .userName(generateUserName(input.getName(), input.getLastName()))
                 .name(input.getName())
                 .lastName(input.getLastName())
                 .email(input.getEmail())
@@ -39,6 +41,13 @@ public class UserAdapter {
                 .password(uuidPassword)
                 .build();
 
+    }
+
+    public MailModel emailUserResponseStructure(String email, String userName, String uuidPassword){
+        return MailModel.builder()
+                .subject(email)
+                .message("Username: " + userName + " Generic Password: " + uuidPassword)
+                .build();
     }
 
     public String generateUserName(String name, String lastName){

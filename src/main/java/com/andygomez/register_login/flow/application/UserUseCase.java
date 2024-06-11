@@ -1,5 +1,6 @@
 package com.andygomez.register_login.flow.application;
 
+import com.andygomez.register_login.flow.model.MailModel;
 import com.andygomez.register_login.flow.model.UserModel;
 import com.andygomez.register_login.flow.model.repository.UserRepository;
 import com.andygomez.register_login.flow.infrastructure.UserAdapter;
@@ -22,6 +23,9 @@ public class UserUseCase {
     private UserAdapter adapter;
 
     @Autowired
+    private MailUseCase mailUseCase;
+
+    @Autowired
     private TokenUseCase tokenUseCase;
 
     public UserResponse createUser(UserInput input) {
@@ -41,6 +45,10 @@ public class UserUseCase {
             UserModel newUser = adapter.inputToModel(input, uuidPassword);
 
             repository.save(newUser);
+
+            MailModel newEmail = adapter.emailUserResponseStructure(input.getEmail(), newUser.getUserName(), uuidPassword);
+
+            mailUseCase.sendMail(newUser.getEmail(),newEmail);
 
             tokenUseCase.encrypt(newUser.toString());
 
