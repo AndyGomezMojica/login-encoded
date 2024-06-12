@@ -43,6 +43,12 @@ public class UserAdapter {
 
     }
 
+    public void updatePasswordByResponse(UserModel user, String newPassword) {
+        user.setPassword(tokenUseCase.encrypt(newPassword));
+        user.setModifiedAt(new Date());
+        user.setModifiedBy("USER");
+    }
+
     public MailModel emailUserResponseStructure(String email, String userName, String uuidPassword){
         return MailModel.builder()
                 .subject(email)
@@ -53,7 +59,6 @@ public class UserAdapter {
     public String generateUserName(String name, String lastName){
         String actualName = name.substring(0,1);
         String cleanedLastName = lastName.replace(" ", "");
-        String newUserName = actualName + cleanedLastName;
-        return newUserName;
+        return actualName + cleanedLastName.toUpperCase();
     }
 }
