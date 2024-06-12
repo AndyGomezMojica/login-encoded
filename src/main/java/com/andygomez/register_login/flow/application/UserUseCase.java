@@ -61,6 +61,54 @@ public class UserUseCase {
         }
     }
 
+    public String loginWithCredentials(String userName, String password){
+        try {
+
+            UserModel existingUser = repository.findByUserName(userName);
+
+            validateUserName(existingUser.getUserName());
+
+            String existingPassword = decodePassword(existingUser.getUserName());
+
+            if (!existingPassword.equals(password)){
+                return "Password incorrect";
+            }
+
+            return "Login successfully";
+
+        }catch (Exception e){
+            log.error("Error to login: ", e);
+            throw e;
+        }
+    }
+
+    public void updateGenericPassword(String userName, String password){
+        try{
+            UserModel existingUser = repository.findByUserName(userName);
+
+            validateUserName(existingUser.getUserName());
+
+            adapter.updatePasswordByResponse(existingUser, password);
+            repository.save(existingUser);
+        }catch (Exception e){
+            log.error("Error updating password: ", e);
+        }
+    }
+
+    public String decodePassword(String userName){
+
+        try {
+            UserModel actualUser = repository.findByUserName(userName);
+
+            validateUserName(actualUser.getUserName());
+
+            return tokenUseCase.decrypt(actualUser.getPassword());
+        }catch (Exception e){
+            log.error("Error to decode a password: ", e);
+            throw e;
+        }
+    }
+
     private boolean validateEmail(UserModel user) {
         if (user != null) {
             log.info("Email {}, already exists, register a new email", user.getEmail());
@@ -72,6 +120,14 @@ public class UserUseCase {
     private boolean validateNullFields(UserInput input) {
         if (input.getName() == null || input.getLastName() == null || input.getEmail() == null) {
             log.info("The fields must not be empty");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateUserName(String userName){
+        if (userName == null){
+            log.info("User with that username does not exist");
             return false;
         }
         return true;
